@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicBharat — Nagar Sahayak Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-900:#10142A;
+    --ink-800:#171C38;
+    --ink-700:#232A4D;
+    --paper:#F4EFE4;
+    --saffron:#E8871E;
+    --saffron-dim:#c76f12;
+    --ashoka:#1F8A70;
+    --danger:#C1503F;
+    --line:#3A4270;
+    --text-soft:#C7CBE0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink-900);
+    color:var(--paper);
+    font-family:'IBM Plex Sans',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--saffron);color:var(--ink-900);}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  .hidden{display:none !important;}
+
+  /* ---------- background texture ---------- */
+  .bg-grid{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size:38px 38px;
+    mask-image:radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%);
+  }
+
+  /* =====================================================
+     LOGIN VIEW
+     ===================================================== */
+  #login-view{
+    position:relative;z-index:1;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:56px 20px 40px;
+  }
+  .brandmark{
+    display:flex;align-items:center;gap:14px;margin-bottom:6px;
+  }
+  .seal{
+    width:52px;height:52px;flex:0 0 auto;
+    border-radius:50%;
+    border:2px solid var(--saffron);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+    animation:seal-in 900ms cubic-bezier(.2,.9,.25,1) both;
+  }
+  .seal::before{
+    content:"";position:absolute;inset:5px;border-radius:50%;
+    border:1px dashed rgba(232,135,30,0.55);
+  }
+  .seal svg{width:24px;height:24px;}
+  @keyframes seal-in{
+    0%{transform:rotate(-24deg) scale(.6);opacity:0;}
+    100%{transform:rotate(0deg) scale(1);opacity:1;}
+  }
+  .brand-text .display{font-size:26px;font-weight:700;letter-spacing:.2px;margin:0;line-height:1;}
+  .brand-text .tag{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-soft);margin-top:4px;}
+
+  .register-frame{
+    margin-top:40px;
+    width:100%;max-width:900px;
+    background:linear-gradient(180deg, var(--ink-800), var(--ink-700));
+    border:1px solid var(--line);
+    border-radius:4px;
+    position:relative;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,0.6);
+    overflow:hidden;
+  }
+  .register-frame::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:6px;
+    background:repeating-linear-gradient(90deg, var(--saffron) 0 22px, transparent 22px 34px);
+    opacity:.85;
+  }
+  .register-header{
+    padding:28px 34px 18px;
+    border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;
+  }
+  .register-header h1{font-size:22px;margin:0 0 6px;}
+  .register-header p{margin:0;color:var(--text-soft);font-size:14px;max-width:46ch;}
+  .entry-no{font-size:12px;color:var(--saffron);text-align:right;}
+
+  .role-tabs{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:0;
+    border-bottom:1px solid var(--line);
+  }
+  .role-tab{
+    background:transparent;border:none;color:var(--text-soft);
+    padding:18px 16px;text-align:left;
+    border-right:1px solid var(--line);
+    position:relative;
+    transition:background 160ms ease, color 160ms ease;
+  }
+  .role-tab:last-child{border-right:none;}
+  .role-tab .k{
+    display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--saffron);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;
+  }
+  .role-tab .n{font-size:16px;font-weight:600;color:var(--paper);}
+  .role-tab .d{font-size:12.5px;margin-top:4px;color:var(--text-soft);line-height:1.4;}
+  .role-tab.active{background:rgba(232,135,30,0.08);}
+  .role-tab.active::after{
+    content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--saffron);
+  }
+  .role-tab:hover{background:rgba(255,255,255,0.03);}
+
+  .login-body{padding:30px 34px 34px;display:grid;grid-template-columns:1.1fr .9fr;gap:36px;}
+  @media (max-width:720px){ .login-body{grid-template-columns:1fr;} .role-tabs{grid-template-columns:1fr;} .role-tab{border-right:none;border-bottom:1px solid var(--line);} }
+
+  .field-group label{
+    display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-soft);margin-bottom:7px;
+  }
+  .field-group input{
+    width:100%;background:var(--ink-900);border:1px solid var(--line);
+    color:var(--paper);padding:11px 13px;border-radius:2px;font-size:14.5px;
+    margin-bottom:18px;
+  }
+  .field-group input:focus{outline:2px solid var(--saffron);outline-offset:1px;border-color:var(--saffron);}
+  .cta-row{display:flex;align-items:center;gap:14px;margin-top:4px;}
+  .btn-primary{
+    background:var(--saffron);color:var(--ink-900);border:none;font-weight:600;
+    padding:12px 22px;border-radius:2px;font-size:14.5px;letter-spacing:.01em;
+    transition:background 150ms ease, transform 150ms ease;
+  }
+  .btn-primary:hover{background:var(--saffron-dim);transform:translateY(-1px);}
+  .btn-primary:focus-visible{outline:2px solid var(--paper);outline-offset:2px;}
+  .demo-note{font-size:12px;color:var(--text-soft);}
+
+  .role-brief{
+    border-left:1px solid var(--line);padding-left:32px;
+  }
+  .role-brief h3{font-size:18px;margin:0 0 10px;}
+  .role-brief ul{margin:0 0 18px;padding-left:18px;color:var(--text-soft);font-size:13.5px;line-height:1.9;}
+  .role-brief .stat-line{
+    display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;
+    font-size:12px;color:var(--text-soft);border-top:1px solid var(--line);padding-top:12px;margin-top:6px;
+  }
+  .stat-line b{color:var(--paper);font-size:15px;display:block;font-family:'Fraunces',serif;}
+
+  .login-footer{
+    text-align:center;color:var(--text-soft);font-size:12px;margin-top:26px;max-width:600px;line-height:1.6;
+  }
+
+  /* =====================================================
+     APP (post-login) VIEW
+     ===================================================== */
+  #app-view{position:relative;z-index:1;min-height:100vh;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 32px;border-bottom:1px solid var(--line);
+    background:var(--ink-800);
+    position:sticky;top:0;z-index:5;
+  }
+  .topbar .brandmark .seal{width:36px;height:36px;animation:none;}
+  .topbar .brandmark .seal svg{width:17px;height:17px;}
+  .topbar .brandmark .brand-text .display{font-size:18px;}
+  .topbar .brandmark .brand-text .tag{display:none;}
+  .who{display:flex;align-items:center;gap:16px;}
+  .who .badge{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--saffron);border:1px solid var(--saffron);
+    padding:5px 10px;border-radius:20px;
+  }
+  .logout-btn{
+    background:transparent;border:1px solid var(--line);color:var(--text-soft);
+    padding:8px 14px;border-radius:2px;font-size:13px;
+  }
+  .logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+  .app-shell{max-width:1180px;margin:0 auto;padding:34px 28px 80px;}
+  .app-head{margin-bottom:28px;}
+  .app-head h2{font-size:24px;margin:0 0 6px;}
+  .app-head p{color:var(--text-soft);margin:0;font-size:14px;}
+
+  .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px;}
+  @media (max-width:800px){.stat-strip{grid-template-columns:repeat(2,1fr);}}
+  .stat-card{
+    background:var(--ink-800);border:1px solid var(--line);padding:16px 18px;border-radius:3px;
+  }
+  .stat-card .v{font-family:'Fraunces',serif;font-size:26px;}
+  .stat-card .l{font-size:11.5px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1.3fr;gap:26px;align-items:start;}
+  @media (max-width:900px){.grid-2{grid-template-columns:1fr;}}
+
+  .panel{background:var(--ink-800);border:1px solid var(--line);border-radius:3px;padding:24px;}
+  .panel h3{margin:0 0 4px;font-size:16px;}
+  .panel .sub{color:var(--text-soft);font-size:12.5px;margin:0 0 18px;}
+
+  .form-row{margin-bottom:16px;}
+  .form-row label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin-bottom:6px;}
+  select, textarea, .form-row input{
+    width:100%;background:var(--ink-900);border:1px solid var(--line);color:var(--paper);
+    padding:10px 12px;border-radius:2px;font-size:14px;font-family:inherit;
+  }
+  textarea{min-height:78px;resize:vertical;}
+
+  .complaint-list{display:flex;flex-direction:column;gap:12px;max-height:560px;overflow:auto;padding-right:4px;}
+  .complaint-card{
+    border:1px solid var(--line);border-radius:3px;padding:14px 16px;
+    display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+  }
+  .complaint-card .meta{display:flex;flex-direction:column;gap:2px;}
+  .complaint-card .cat{font-size:14.5px;font-weight:600;}
+  .complaint-card .loc{font-size:12.5px;color:var(--text-soft);}
+  .complaint-card .id{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-soft);margin-top:6px;}
+  .status-pill{
+    font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border-radius:20px;
+    white-space:nowrap;height:fit-content;
+  }
+  .status-Reported{background:rgba(193,80,63,0.18);color:#e8837a;}
+  .status-Assigned{background:rgba(232,135,30,0.18);color:var(--saffron);}
+  .status-Resolved{background:rgba(31,138,112,0.2);color:#5fd1b4;}
+
+  .status-select{margin-top:8px;}
+  .status-select select{padding:6px 8px;font-size:12.5px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);padding:8px 10px;border-bottom:1px solid var(--line);}
+  td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+
+  .dept-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .dept-bar-row .dl{width:130px;font-size:12.5px;color:var(--text-soft);flex:0 0 auto;}
+  .dept-bar-track{flex:1;height:8px;background:var(--ink-900);border-radius:4px;overflow:hidden;}
+  .dept-bar-fill{height:100%;background:var(--saffron);}
+  .dept-bar-row .dv{width:28px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-soft);}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ashoka);color:#0d1f1a;padding:12px 20px;border-radius:3px;font-size:13.5px;font-weight:600;
+    opacity:0;transition:opacity 220ms ease, transform 220ms ease;pointer-events:none;z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .empty-note{color:var(--text-soft);font-size:13px;padding:18px 0;text-align:center;}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- ============================= LOGIN VIEW ============================= -->
+<section id="login-view">
+  <div class="brandmark">
+    <div class="seal">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7l-9-5z" stroke="#E8871E" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="brand-text">
+      <p class="display">CivicBharat</p>
+      <p class="tag">Nagar Sahayak · Civic Complaint Register</p>
+    </div>
+  </div>
+
+  <div class="register-frame">
+    <div class="register-header">
+      <div>
+        <h1>Sign in to your ward register</h1>
+        <p>Report, route, and resolve civic issues — potholes, water leaks, garbage, streetlights — with one shared record across citizens, officers, and administrators.</p>
+      </div>
+      <div class="entry-no mono">REGISTER NO. CB-2026-<span id="entry-rand">0417</span></div>
+    </div>
+
+    <div class="role-tabs" id="role-tabs">
+      <button class="role-tab active" data-role="citizen">
+        <span class="k">Entry 01</span>
+        <span class="n">Citizen</span>
+        <span class="d">File a complaint with a photo and pin, then track it to resolution.</span>
+      </button>
+      <button class="role-tab" data-role="officer">
+        <span class="k">Entry 02</span>
+        <span class="n">Government Officer</span>
+        <span class="d">Work the ward queue — assign, update status, close cases.</span>
+      </button>
+      <button class="role-tab" data-role="admin">
+        <span class="k">Entry 03</span>
+        <span class="n">Administrator</span>
+        <span class="d">Oversee departments, staffing, and city-wide resolution trends.</span>
+      </button>
+    </div>
+
+    <div class="login-body">
+      <div>
+        <div class="field-group">
+          <label for="login-email">Registered email</label>
+          <input id="login-email" type="email" placeholder="you@example.in" autocomplete="username">
+          <label for="login-pass">Password</label>
+          <input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="cta-row">
+          <button class="btn-primary" id="login-btn">Continue as <span id="login-role-label">Citizen</span></button>
+          <span class="demo-note">No account needed — this demo signs you in instantly.</span>
+        </div>
+      </div>
+
+      <div class="role-brief" id="role-brief">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <p class="login-footer">CivicBharat is a demonstration platform. All data lives only in this browser tab's memory and clears on refresh — nothing is sent to a server.</p>
+</section>
+
+<!-- ============================= APP VIEW ============================= -->
+<section id="app-view" class="hidden">
+  <div class="topbar">
+    <div class="brandmark">
+      <div class="seal"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7l-9-5z" stroke="#E8871E" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+      <div class="brand-text"><p class="display">CivicBharat</p></div>
+    </div>
+    <div class="who">
+      <span class="badge" id="who-badge">CITIZEN</span>
+      <button class="logout-btn" id="logout-btn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- CITIZEN DASHBOARD -->
+    <div id="dash-citizen" class="hidden">
+      <div class="app-head">
+        <h2>File and track your complaints</h2>
+        <p>Every entry you submit is timestamped and routed to the right department automatically.</p>
+      </div>
+      <div class="stat-strip">
+        <div class="stat-card"><div class="v mono" id="c-stat-total">0</div><div class="l">Filed by you</div></div>
+        <div class="stat-card"><div class="v mono" id="c-stat-open">0</div><div class="l">Awaiting action</div></div>
+        <div class="stat-card"><div class="v mono" id="c-stat-resolved">0</div><div class="l">Resolved</div></div>
+        <div class="stat-card"><div class="v mono">36h</div><div class="l">Avg. resolution</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>New complaint</h3>
+          <p class="sub">Fill in what you saw — location details help officers respond faster.</p>
+          <div class="form-row">
+            <label for="f-cat">Category</label>
+            <select id="f-cat">
+              <option>Pothole</option>
+              <option>Water leak</option>
+              <option>Garbage</option>
+              <option>Streetlight</option>
+              <option>Drainage</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="f-loc">Location / landmark</label>
+            <input id="f-loc" type="text" placeholder="e.g. Near Andheri East metro gate 2">
+          </div>
+          <div class="form-row">
+            <label for="f-desc">Description</label>
+            <textarea id="f-desc" placeholder="Describe the issue briefly"></textarea>
+          </div>
+          <button class="btn-primary" id="submit-complaint">Submit complaint</button>
+        </div>
+        <div class="panel">
+          <h3>Your complaints</h3>
+          <p class="sub">Newest first.</p>
+          <div class="complaint-list" id="citizen-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OFFICER DASHBOARD -->
+    <div id="dash-officer" class="hidden">
+      <div class="app-head">
+        <h2>Ward complaint queue</h2>
+        <p>Update status as your team works each case.</p>
+      </div>
+      <div class="stat-strip">
+        <div class="stat-card"><div class="v mono" id="o-stat-total">0</div><div class="l">Total in queue</div></div>
+        <div class="stat-card"><div class="v mono" id="o-stat-reported">0</div><div class="l">New / reported</div></div>
+        <div class="stat-card"><div class="v mono" id="o-stat-assigned">0</div><div class="l">Assigned</div></div>
+        <div class="stat-card"><div class="v mono" id="o-stat-resolved">0</div><div class="l">Resolved</div></div>
+      </div>
+      <div class="panel">
+        <h3>All complaints</h3>
+        <p class="sub">Change status directly from the table.</p>
+        <table>
+          <thead><tr><th>ID</th><th>Category</th><th>Location</th><th>Filed</th><th>Status</th></tr></thead>
+          <tbody id="officer-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div id="dash-admin" class="hidden">
+      <div class="app-head">
+        <h2>City-wide overview</h2>
+        <p>Department load and resolution performance across all wards.</p>
+      </div>
+      <div class="stat-strip">
+        <div class="stat-card"><div class="v mono" id="a-stat-total">0</div><div class="l">Complaints tracked</div></div>
+        <div class="stat-card"><div class="v mono">6</div><div class="l">Departments</div></div>
+        <div class="stat-card"><div class="v mono" id="a-stat-resolved">0</div><div class="l">Resolved</div></div>
+        <div class="stat-card"><div class="v mono">36h</div><div class="l">Avg. resolution</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Complaints by category</h3>
+          <p class="sub">Share of total filed.</p>
+          <div id="admin-bars"></div>
+        </div>
+        <div class="panel">
+          <h3>Recent activity</h3>
+          <p class="sub">Latest entries across all wards.</p>
+          <div class="complaint-list" id="admin-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  document.getElementById('entry-rand').textContent = String(Math.floor(1000+Math.random()*8999));
+
+  // ---------- in-memory state (no localStorage per platform constraints) ----------
+  var CATS = ["Pothole","Water leak","Garbage","Streetlight","Drainage","Other"];
+  var LOCS = ["Andheri East, Mumbai","Koramangala, Bengaluru","Rohini, Delhi","Salt Lake, Kolkata","Gomti Nagar, Lucknow"];
+  var complaints = [];
+  var seq = 100;
+
+  function seedComplaint(catIdx, status, hoursAgo, loc){
+    seq++;
+    complaints.push({
+      id: "CB-" + seq,
+      cat: CATS[catIdx],
+      loc: loc || LOCS[Math.floor(Math.random()*LOCS.length)],
+      desc: "",
+      status: status,
+      filedAt: new Date(Date.now() - hoursAgo*3600*1000),
+      byCitizen: true
+    });
+  }
+  // seed some demo data so officer/admin views aren't empty
+  seedComplaint(0,"Resolved",50,"Andheri East, Mumbai");
+  seedComplaint(1,"Assigned",30,"Koramangala, Bengaluru");
+  seedComplaint(2,"Reported",6,"Rohini, Delhi");
+  seedComplaint(3,"Assigned",18,"Salt Lake, Kolkata");
+  seedComplaint(0,"Reported",2,"Gomti Nagar, Lucknow");
+  seedComplaint(4,"Resolved",70,"Andheri East, Mumbai");
+
+  var currentRole = "citizen";
+
+  var roleBriefs = {
+    citizen: {
+      title:"For citizens",
+      items:[
+        "Submit with a category, landmark, and short description",
+        "Track your complaint's status until it's resolved",
+        "See how long similar issues typically take"
+      ],
+      stat:{n:"6", l:"open categories you can report"}
+    },
+    officer:{
+      title:"For government officers",
+      items:[
+        "See every complaint filed in your ward, newest first",
+        "Move a case from Reported → Assigned → Resolved",
+        "Spot categories piling up before they escalate"
+      ],
+      stat:{n:"36h", l:"average time to resolution"}
+    },
+    admin:{
+      title:"For administrators",
+      items:[
+        "City-wide view across all departments and wards",
+        "See category share to plan staffing and budget",
+        "Monitor recent activity across every officer"
+      ],
+      stat:{n:"6", l:"departments under management"}
+    }
+  };
+
+  function renderRoleBrief(role){
+    var b = roleBriefs[role];
+    document.getElementById('role-brief').innerHTML =
+      '<h3>'+b.title+'</h3>' +
+      '<ul>' + b.items.map(function(i){return '<li>'+i+'</li>';}).join('') + '</ul>' +
+      '<div class="stat-line"><span>Typical for this role</span><b class="display">'+b.stat.n+'</b></div>' +
+      '<div class="stat-line"><span></span><span>'+b.stat.l+'</span></div>';
+    document.getElementById('login-role-label').textContent =
+      role === "citizen" ? "Citizen" : role === "officer" ? "Officer" : "Administrator";
+  }
+  renderRoleBrief("citizen");
+
+  var tabs = document.querySelectorAll('.role-tab');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      currentRole = tab.getAttribute('data-role');
+      renderRoleBrief(currentRole);
+    });
+  });
+
+  document.getElementById('login-btn').addEventListener('click', function(){
+    document.getElementById('login-view').classList.add('hidden');
+    document.getElementById('app-view').classList.remove('hidden');
+    ['dash-citizen','dash-officer','dash-admin'].forEach(function(id){
+      document.getElementById(id).classList.add('hidden');
+    });
+    document.getElementById('dash-'+currentRole).classList.remove('hidden');
+    document.getElementById('who-badge').textContent =
+      currentRole === "citizen" ? "CITIZEN" : currentRole === "officer" ? "GOVT. OFFICER" : "ADMINISTRATOR";
+    renderAll();
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', function(){
+    document.getElementById('app-view').classList.add('hidden');
+    document.getElementById('login-view').classList.remove('hidden');
+    document.getElementById('login-email').value = "";
+    document.getElementById('login-pass').value = "";
+  });
+
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  function timeAgo(d){
+    var mins = Math.round((Date.now()-d.getTime())/60000);
+    if(mins < 60) return mins + "m ago";
+    var hrs = Math.round(mins/60);
+    if(hrs < 24) return hrs + "h ago";
+    return Math.round(hrs/24) + "d ago";
+  }
+
+  // ---------- CITIZEN ----------
+  document.getElementById('submit-complaint').addEventListener('click', function(){
+    var cat = document.getElementById('f-cat').value;
+    var loc = document.getElementById('f-loc').value.trim();
+    var desc = document.getElementById('f-desc').value.trim();
+    if(!loc){ showToast("Add a location so officers can find it"); return; }
+    seq++;
+    complaints.unshift({
+      id:"CB-"+seq, cat:cat, loc:loc, desc:desc, status:"Reported",
+      filedAt:new Date(), byCitizen:true
+    });
+    document.getElementById('f-loc').value = "";
+    document.getElementById('f-desc').value = "";
+    showToast("Complaint CB-"+seq+" filed");
+    renderAll();
+  });
+
+  function renderCitizen(){
+    var mine = complaints.slice().sort(function(a,b){return b.filedAt-a.filedAt;});
+    document.getElementById('c-stat-total').textContent = mine.length;
+    document.getElementById('c-stat-open').textContent = mine.filter(function(c){return c.status!=="Resolved";}).length;
+    document.getElementById('c-stat-resolved').textContent = mine.filter(function(c){return c.status==="Resolved";}).length;
+
+    var list = document.getElementById('citizen-list');
+    if(mine.length===0){ list.innerHTML = '<div class="empty-note">No complaints yet — file your first one on the left.</div>'; return; }
+    list.innerHTML = mine.map(function(c){
+      return '<div class="complaint-card">' +
+        '<div class="meta"><span class="cat">'+c.cat+'</span><span class="loc">'+c.loc+'</span>' +
+        '<span class="id">'+c.id+' · '+timeAgo(c.filedAt)+'</span></div>' +
+        '<span class="status-pill status-'+c.status+'">'+c.status+'</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ---------- OFFICER ----------
+  function renderOfficer(){
+    var all = complaints.slice().sort(function(a,b){return b.filedAt-a.filedAt;});
+    document.getElementById('o-stat-total').textContent = all.length;
+    document.getElementById('o-stat-reported').textContent = all.filter(function(c){return c.status==="Reported";}).length;
+    document.getElementById('o-stat-assigned').textContent = all.filter(function(c){return c.status==="Assigned";}).length;
+    document.getElementById('o-stat-resolved').textContent = all.filter(function(c){return c.status==="Resolved";}).length;
+
+    var body = document.getElementById('officer-table-body');
+    if(all.length===0){ body.innerHTML = '<tr><td colspan="5" class="empty-note">No complaints in the queue.</td></tr>'; return; }
+    body.innerHTML = all.map(function(c){
+      return '<tr>' +
+        '<td class="mono">'+c.id+'</td>' +
+        '<td>'+c.cat+'</td>' +
+        '<td>'+c.loc+'</td>' +
+        '<td>'+timeAgo(c.filedAt)+'</td>' +
+        '<td><select class="status-change" data-id="'+c.id+'">' +
+          ['Reported','Assigned','Resolved'].map(function(s){
+            return '<option value="'+s+'"'+(s===c.status?' selected':'')+'>'+s+'</option>';
+          }).join('') +
+        '</select></td>' +
+      '</tr>';
+    }).join('');
+    body.querySelectorAll('.status-change').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        var c = complaints.find(function(x){return x.id===sel.getAttribute('data-id');});
+        if(c){ c.status = sel.value; showToast(c.id+" marked "+c.status); renderAll(); }
+      });
+    });
+  }
+
+  // ---------- ADMIN ----------
+  function renderAdmin(){
+    document.getElementById('a-stat-total').textContent = complaints.length;
+    document.getElementById('a-stat-resolved').textContent = complaints.filter(function(c){return c.status==="Resolved";}).length;
+
+    var counts = {};
+    CATS.forEach(function(c){counts[c]=0;});
+    complaints.forEach(function(c){counts[c.cat]=(counts[c.cat]||0)+1;});
+    var max = Math.max.apply(null, Object.values(counts).concat([1]));
+    document.getElementById('admin-bars').innerHTML = CATS.map(function(cat){
+      var v = counts[cat]||0;
+      var pct = Math.round((v/max)*100);
+      return '<div class="dept-bar-row"><span class="dl">'+cat+'</span>' +
+        '<div class="dept-bar-track"><div class="dept-bar-fill" style="width:'+pct+'%"></div></div>' +
+        '<span class="dv">'+v+'</span></div>';
+    }).join('');
+
+    var recent = complaints.slice().sort(function(a,b){return b.filedAt-a.filedAt;}).slice(0,6);
+    document.getElementById('admin-list').innerHTML = recent.map(function(c){
+      return '<div class="complaint-card">' +
+        '<div class="meta"><span class="cat">'+c.cat+'</span><span class="loc">'+c.loc+'</span>' +
+        '<span class="id">'+c.id+' · '+timeAgo(c.filedAt)+'</span></div>' +
+        '<span class="status-pill status-'+c.status+'">'+c.status+'</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderAll(){
+    renderCitizen();
+    renderOfficer();
+    renderAdmin();
+  }
+})();
+</script>
+</body>
+</html>
